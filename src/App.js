@@ -1,9 +1,18 @@
 import React from 'react'
-import './App.css';
+import Users from './Users'
+import { gql } from 'apollo-boost'
 
-function App() {
-  <div>
-  </div>
-}
+export const ROOT_QUERY = gql`
+  query allUsers {
+    totalUsers
+    allUsers {
+      githubLogin
+      name
+      avatar
+    }
+  }
+`
+
+const App = () => <Users />
 
 export default App;

@@ -1,9 +1,8 @@
 import React from 'react';
 import { render } from 'react-dom';
-import './index.css';
 import App from './App';
 import ApolloClient, { gql } from 'apollo-boost'
-import ApolloProvider from 'apollo-boost';
+import { ApolloProvider } from 'react-apollo';
 
 const client = new ApolloClient({ uri: 'http://localhost:4000/graphql' })
 
