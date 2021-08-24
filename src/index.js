@@ -6,17 +6,17 @@ import { ApolloProvider } from 'react-apollo';
 
 const client = new ApolloClient({ uri: 'http://localhost:4000/graphql' })
 
-const query = gql`
-  {
-    totalUsers
-    totalPhotos
-  }
-`
+// const query = gql`
+//   {
+//     totalUsers
+//     totalPhotos
+//   }
+// `
 
-console.log('cache', client.extract())
-client.query({query})
-  .then(({data}) => console.log('cache', client.extract()))
-  .catch(console.error)
+// console.log('cache', client.extract())
+// client.query({query})
+//   .then(({data}) => console.log('cache', client.extract()))
+//   .catch(console.error)
 
 render(
     <ApolloProvider client={client}>
