@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
-import { Mutation } from 'react-apollo'
+import { Query, Mutation } from 'react-apollo'
 import { ROOT_QUERY } from './App'
 import { gql } from 'apollo-boost'
 
@@ -10,11 +10,32 @@ const GITHUB_AUTH_MUTATION = gql`
     }
 `
 
+const Me = ({ logout, requestCode, signingIn }) =>
+    <Query query={ROOT_QUERY}>
+        {({ loading, data }) => data.me ?
+            <CurrentUser {...data.me} logout={logout} /> :
+            loading ?
+                <p>loading...</p> :
+                <button
+                    onClick={requestCode}
+                    disabled={signingIn}>
+                    Sign In With GitHub
+                </button>
+        }
+    </Query>
+
+const CurrentUser = ({ name, avatar, logout }) =>
+    <div>
+        <img src={avatar} width={48} height={48} alt="" />
+        <h1>{name}</h1>
+        <button onClick={logout}>logout</button>
+    </div>
+
 class AuthorizedUser extends Component {
 
     state = { signingIn: false }
 
-    authorizationComplete = ( cache, { data }) => {
+    authorizationComplete = (cache, { data }) => {
         localStorage.setItem('token', data.githubAuth.token)
 
         //ReactRouter에서 전달한 프로퍼티 history를 조작
@@ -28,7 +49,7 @@ class AuthorizedUser extends Component {
         if (window.location.search.match(/code=/)) {
             this.setState({ signingInIn: true })
             const code = window.location.search.replace("?code=", "")
-            this.githubAuthMutation({ variables: {code} })
+            this.githubAuthMutation({ variables: { code } })
         }
     }
 
@@ -40,17 +61,19 @@ class AuthorizedUser extends Component {
 
     render() {
         return (
-            <Mutation mutation={GITHUB_AUTH_MUTATION}
+            <Mutation
+                mutation={GITHUB_AUTH_MUTATION}
                 update={this.authorizationComplete}
                 refetchQueries={[{ query: ROOT_QUERY }]}>
                 {mutation => {
-                    this.githubAuthMutation = mutation 
+                    this.githubAuthMutation = mutation
                     return (
-                        <button
-                            onClick={this.requestCode}
-                            disabled={this.state.signingIn}>
-                            Sign In with GitHub
-                        </button>
+                        <Me signingIn={this.state.signingIn}
+                            requestCode={this.requestCode}
+                            logout={() => {
+                                localStorage.removeItem('token')
+                                this.props.history.go(0);
+                            }} />
                     )
                 }}
             </Mutation>
