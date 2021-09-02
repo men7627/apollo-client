@@ -1,10 +1,29 @@
 import React from 'react';
 import { render } from 'react-dom';
 import App from './App';
-import ApolloClient, { gql } from 'apollo-boost'
+import ApolloClient, { InMemoryCache } from 'apollo-boost'
 import { ApolloProvider } from 'react-apollo';
+import { persistCache } from 'apollo-cache-persist';
+
+console.log(localStorage['apollo-cache-persist'])
+
+const cache = new InMemoryCache()
+
+//브라우저 창의 localStorage 스토어에 캐시를 보관
+persistCache({
+  cache,
+  storage: localStorage
+})
+
+//애플리케이션 시작 시에 localStorage 존재 여부 체크해 이미 캐시가 존재하는지 확인
+//존재하면 클라이언트 생성 전에 cache 초기화
+if(localStorage['apollo-cache-persist']) {
+  let cacheData = JSON.parse(localStorage['apollo-cache-persist'])
+  cache.restore(cacheData)
+}
 
 const client = new ApolloClient({ 
+  cache,
   uri: 'http://localhost:4000/graphql',
 
   //요청 메서드 추가
@@ -19,18 +38,6 @@ const client = new ApolloClient({
     }))
   }
  })
-
-// const query = gql`
-//   {
-//     totalUsers
-//     totalPhotos
-//   }
-// `
-
-// console.log('cache', client.extract())
-// client.query({query})
-//   .then(({data}) => console.log('cache', client.extract()))
-//   .catch(console.error)
 
 render(
     <ApolloProvider client={client}>
