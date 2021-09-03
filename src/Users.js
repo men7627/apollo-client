@@ -30,7 +30,8 @@ const UserList = ({ count, users, refetchUsers }) =>
         <Mutation mutation={ADD_FAKE_USERS_MUTATION}
             variables={{ count: 1 }}
             //refetchQueries={[{ query: ROOT_QUERY }]} ADD_FAKE_USERS_MUTATION으로 추가된 사용자 리스트 바로 받아 오므로 불필요
-            update={updateUserCache}> //캐시와 Mutation 응답 결과를 인자로 넘김
+            //캐시와 Mutation 응답 결과를 인자로 넘김
+            update={updateUserCache}> 
             {addFakeUsers =>
                 <button onClick={addFakeUsers}>임시 사용자 추가</button>}
         </Mutation>
@@ -50,13 +51,21 @@ const UserListItem = ({ name, avatar }) =>
     </li>
 
 const updateUserCache = (cache, { data:{ addFakeUsers }}) => {
+    //캐시에서 기존 데이터 읽어옴
     let data = cache.readQuery({ query: ROOT_QUERY })
+
+    console.log('data : ' + data.allUsers)
+
+    //캐시에서 읽어온 데이터 중 유저 수 증가
     data.totalUsers += addFakeUsers.length
+
+    //캐시에서 읽어온 데이터 중 실제 유저 데이터 증가
     data.allUsers = [
         ...data.allUsers,
         ...addFakeUsers
     ]
 
+    //기존 캐시 데이터를 덮에씀
     cache.writeQuery({ query: ROOT_QUERY, data })
 }
 

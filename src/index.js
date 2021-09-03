@@ -5,7 +5,7 @@ import ApolloClient, { InMemoryCache } from 'apollo-boost'
 import { ApolloProvider } from 'react-apollo';
 import { persistCache } from 'apollo-cache-persist';
 
-console.log(localStorage['apollo-cache-persist'])
+// console.log(localStorage['apollo-cache-persist'])
 
 const cache = new InMemoryCache()
 
