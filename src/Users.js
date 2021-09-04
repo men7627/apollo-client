@@ -53,9 +53,7 @@ const UserListItem = ({ name, avatar }) =>
 const updateUserCache = (cache, { data:{ addFakeUsers }}) => {
     //캐시에서 기존 데이터 읽어옴
     let data = cache.readQuery({ query: ROOT_QUERY })
-
-    console.log('data : ' + data.allUsers)
-
+    
     //캐시에서 읽어온 데이터 중 유저 수 증가
     data.totalUsers += addFakeUsers.length
 

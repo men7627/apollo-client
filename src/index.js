@@ -1,11 +1,19 @@
+import {
+  InMemoryCache,
+  HttpLink,
+  ApolloLink,
+  ApolloClient,
+  split
+} from 'apollo-boost'
+import { WebSocketLink } from 'apollo-link-ws'
+import { getMainDefinition } from 'apollo-utilities'
 import React from 'react';
 import { render } from 'react-dom';
 import App from './App';
-import ApolloClient, { InMemoryCache } from 'apollo-boost'
 import { ApolloProvider } from 'react-apollo';
 import { persistCache } from 'apollo-cache-persist';
 
-// console.log(localStorage['apollo-cache-persist'])
+console.log(localStorage['apollo-cache-persist'])
 
 const cache = new InMemoryCache()
 
@@ -22,22 +30,34 @@ if(localStorage['apollo-cache-persist']) {
   cache.restore(cacheData)
 }
 
-const client = new ApolloClient({ 
-  cache,
-  uri: 'http://localhost:4000/graphql',
+const httpLink = new HttpLink({ uri: 'http://localhost:4000/graphql' })
+const wsLink = new WebSocketLink({
+  uri: `ws://localhost:4000/graphql`,
+  options: { reconnect: true }
+})
 
-  //요청 메서드 추가
-  //요청 보내기 전 모든 operation에 세부 정보를 추가할 수 있는 메서드
-  //operation context에 세부 정보 추가
-  request: operation => {
-    operation.setContext(context => ({
-      headers: {
-        ...context.headers,
-        authorization: localStorage.getItem('token')
-      }
-    }))
-  }
- })
+const authLink = new ApolloLink((operation, forward) => {
+  operation.setContext(context => ({
+    headers: {
+      ...context.headers,
+      authorization: localStorage.getItem('token')
+    }
+  }))
+  return forward(operation)
+})
+
+const httpAuthLink = authLink.concat(httpLink)
+
+const link = split(
+  ({ query }) => {
+    const { kind, operation } = getMainDefinition(query)
+    return kind === 'OperationDefinition' && operation === 'subscription'
+  },
+  wsLink,
+  httpAuthLink
+)
+
+const client = new ApolloClient({ cache, link })
 
 render(
     <ApolloProvider client={client}>
