@@ -1,6 +1,5 @@
 import {
   InMemoryCache,
-  HttpLink,
   ApolloLink,
   ApolloClient,
   split
@@ -12,6 +11,7 @@ import { render } from 'react-dom';
 import App from './App';
 import { ApolloProvider } from 'react-apollo';
 import { persistCache } from 'apollo-cache-persist';
+import { createUploadLink } from 'apollo-upload-client'
 
 console.log(localStorage['apollo-cache-persist'])
 
@@ -30,7 +30,7 @@ if(localStorage['apollo-cache-persist']) {
   cache.restore(cacheData)
 }
 
-const httpLink = new HttpLink({ uri: 'http://localhost:4000/graphql' })
+const httpLink = createUploadLink({ uri: 'http://localhost:4000/graphql' })
 const wsLink = new WebSocketLink({
   uri: `ws://localhost:4000/graphql`,
   options: { reconnect: true }

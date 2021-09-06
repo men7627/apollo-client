@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
+import { withRouter, NavLink } from 'react-router-dom'
 import { Query, Mutation, compose, withApollo } from 'react-apollo'
 import { ROOT_QUERY } from './App'
 import { gql } from 'apollo-boost'
@@ -29,6 +29,7 @@ const CurrentUser = ({ name, avatar, logout }) =>
         <img src={avatar} width={48} height={48} alt="" />
         <h1>{name}</h1>
         <button onClick={logout}>logout</button>
+        <NavLink to="/newPhoto">Post Photo</NavLink>
     </div>
 
 class AuthorizedUser extends Component {
@@ -59,6 +60,14 @@ class AuthorizedUser extends Component {
         window.location = `http://github.com/login/oauth/authorize?client_id=${clientID}&scope=user`
     }
 
+    logout() {
+        localStorage.removeItem('token')
+        let data = this.props.client.readQuery({ query: ROOT_QUERY })
+        data.me = null
+        this.props.client.writeQuery({ query: ROOT_QUERY, data })
+        // this.props.history.go(0);
+    }
+
     render() {
         return (
             <Mutation
@@ -70,13 +79,7 @@ class AuthorizedUser extends Component {
                     return (
                         <Me signingIn={this.state.signingIn}
                             requestCode={this.requestCode}
-                            logout={() => {
-                                localStorage.removeItem('token')
-                                let data = this.props.client.readQuery({ query: ROOT_QUERY })
-                                data.me = null
-                                this.props.client.writeQuery({ query: ROOT_QUERY, data })
-                                // this.props.history.go(0);
-                            }} />
+                            logout={this.logout} />
                     )
                 }}
             </Mutation>
